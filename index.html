@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <title>CYBER ARCADE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="background-city"></div>
-    <div class="scanline"></div>
+    <div class="background-city" aria-hidden="true"></div>
+    <div class="scanline" aria-hidden="true"></div>
 
-    <!-- MENU PRINCIPALE: SCELTA INTERFACCIA -->
+    <!-- MENU PRINCIPALE -->
     <div id="main-menu" class="menu-container">
         <h1 class="glitch-title">CYBER ARCADE</h1>
-        <p class="subtitle">SELECT INTERFACE MODE</p>
-        
-        <input type="text" id="player-name-input" placeholder="YOUR NAME" maxlength="10">
-        
-        <div class="mode-selection">
+        <p class="subtitle">READY TO PLAY?</p>
+
+        <input type="text" id="player-name-input" placeholder="YOUR NAME" maxlength="12" autocomplete="off">
+
+        <div class="mode-select">
             <button id="btn-desktop" class="mode-btn">DESKTOP</button>
             <button id="btn-mobile" class="mode-btn">MOBILE</button>
         </div>
 
         <div class="settings">
             <button id="btn-music-toggle" class="small-btn">MUSIC: ON</button>
-            <button id="btn-show-leaderboard-main" class="small-btn cyan-btn">LEADERBOARD</button>
+            <button id="btn-show-leaderboard-main" class="small-btn cyan-btn">TOP SCORES</button>
         </div>
     </div>
 
@@ -54,9 +54,7 @@
             <button id="tab-snake" class="tab-btn active">SNAKE</button>
             <button id="tab-pong" class="tab-btn">PONG</button>
         </div>
-        <div id="leaderboard-list" class="leaderboard-list">
-            <!-- I punteggi appariranno qui -->
-        </div>
+        <div id="leaderboard-list" class="leaderboard-list"></div>
         <button id="back-from-leaderboard" class="mode-btn red-btn">BACK</button>
     </div>
 
@@ -64,10 +62,10 @@
     <div id="game-wrapper" class="menu-container hidden">
         <h2 id="game-title-display" class="subtitle">GAME</h2>
         <div id="score">SCORE: 0</div>
-        
+
         <canvas id="gameCanvas"></canvas>
 
-        <div id="mobile-controls" class="hidden">
+        <div id="mobile-controls" class="hidden" aria-hidden="true">
             <div class="d-pad-row">
                 <button id="btn-up" class="d-pad">▲</button>
             </div>
