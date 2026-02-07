@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <title>CYBER ARCADE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="background-city"></div>
-    <div class="scanline"></div>
+    <div class="background-city" aria-hidden="true"></div>
+    <div class="scanline" aria-hidden="true"></div>
 
     <!-- MENU PRINCIPALE -->
     <div id="main-menu" class="menu-container">
         <h1 class="glitch-title">CYBER ARCADE</h1>
         <p class="subtitle">READY TO PLAY?</p>
 
-        <input type="text" id="player-name-input" placeholder="YOUR NAME" maxlength="12">
+        <input type="text" id="player-name-input" placeholder="YOUR NAME" maxlength="12" autocomplete="off">
 
         <button id="btn-play-main" class="mode-btn">PLAY</button>
 
@@ -62,7 +62,7 @@
 
         <canvas id="gameCanvas"></canvas>
 
-        <div id="mobile-controls" class="hidden">
+        <div id="mobile-controls" class="hidden" aria-hidden="true">
             <div class="d-pad-row">
                 <button id="btn-up" class="d-pad">▲</button>
             </div>
