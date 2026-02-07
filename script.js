@@ -64,7 +64,7 @@ let gameInterval;
 let isGameRunning = false;
 
 // --- VARIABILI SNAKE ---
-let gridSize = 20;
+let gridSize = 20; 
 let tileCountX = 20; 
 let tileCountY = 20;
 let snake = [];
@@ -171,9 +171,8 @@ btnBackToMain.addEventListener('click', () => {
     mainMenu.classList.remove('hidden');
 });
 
-// MODIFICA: Salvataggio punteggio all'uscita
 btnExitGame.addEventListener('click', () => {
-    saveCurrentGameScore(); // Salva il punteggio corrente
+    saveCurrentGameScore();
     stopGame();
     gameWrapper.classList.add('hidden');
     gameSelector.classList.remove('hidden');
@@ -196,7 +195,7 @@ btnRetry.addEventListener('click', () => {
         tetrisScore = 0;
         playerReset();
     } else if (currentGame === 'invaders') {
-        initInvaders(true); // Reset completo per retry
+        initInvaders(true);
     }
     startGame();
 });
@@ -222,10 +221,8 @@ tabInvaders.addEventListener('click', () => showLeaderboard('invaders'));
 
 function saveScore(game, score) {
     if (score === 0) return;
-    
     let key = 'cyber_scores_' + game;
     let scores = JSON.parse(localStorage.getItem(key) || '[]');
-    
     let existingUserIndex = scores.findIndex(entry => entry.name === currentPlayerName);
 
     if (existingUserIndex !== -1) {
@@ -235,23 +232,18 @@ function saveScore(game, score) {
     } else {
         scores.push({ name: currentPlayerName, score: score });
     }
-    
     scores.sort((a, b) => b.score - a.score);
     scores = scores.slice(0, 5);
     localStorage.setItem(key, JSON.stringify(scores));
 }
 
-// NUOVA FUNZIONE HELPER PER SALVARE IL PUNTEGGIO CORRENTE
 function saveCurrentGameScore() {
     let finalScore = 0;
     if (currentGame === 'snake') finalScore = snakeScore;
     else if (currentGame === 'pong') finalScore = pongScore;
     else if (currentGame === 'tetris') finalScore = tetrisScore;
     else if (currentGame === 'invaders') finalScore = invScore;
-    
-    if (finalScore > 0) {
-        saveScore(currentGame, finalScore);
-    }
+    if (finalScore > 0) saveScore(currentGame, finalScore);
 }
 
 function showLeaderboard(game) {
@@ -263,9 +255,7 @@ function showLeaderboard(game) {
 
     let key = 'cyber_scores_' + game;
     let scores = JSON.parse(localStorage.getItem(key) || '[]');
-    
     leaderboardList.innerHTML = '';
-    
     if (scores.length === 0) {
         leaderboardList.innerHTML = '<div style="text-align:center; color:#555;">NO SCORES YET</div>';
     } else {
@@ -279,7 +269,7 @@ function showLeaderboard(game) {
 }
 
 // ==========================================
-// INIT GIOCO
+// INIT GIOCO (RESPONSIVE TABLET LANDSCAPE)
 // ==========================================
 
 function initGame(gameName) {
@@ -288,11 +278,47 @@ function initGame(gameName) {
     snakeDifficultyScreen.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
 
-    // CONFIGURAZIONE DIMENSIONI CANVAS
+    // --- LOGICA RESPONSIVE ---
     if (currentMode === 'mobile') {
-        canvas.width = 300; 
-        canvas.height = 540; 
+        const isLandscape = window.innerWidth > window.innerHeight;
+        
+        // Calcola dimensioni massime disponibili
+        let maxWidth = window.innerWidth * 0.95; 
+        let maxHeight = window.innerHeight * 0.65; // Lascia spazio ai tasti
+
+        if (isLandscape) {
+            // TABLET ORIZZONTALE: Usa più larghezza
+            // Target Aspect Ratio: 4:3 o 16:9 (Orizzontale)
+            let targetRatio = 4 / 3; 
+            
+            let newHeight = maxHeight;
+            let newWidth = newHeight * targetRatio;
+
+            // Se la larghezza calcolata è troppa, ridimensiona
+            if (newWidth > maxWidth) {
+                newWidth = maxWidth;
+                newHeight = newWidth / targetRatio;
+            }
+            
+            canvas.width = Math.floor(newWidth);
+            canvas.height = Math.floor(newHeight);
+            
+        } else {
+            // MOBILE VERTICALE (Smartphone)
+            let targetRatio = 9 / 16;
+            let newWidth = maxWidth;
+            let newHeight = newWidth / targetRatio;
+
+            if (newHeight > maxHeight) {
+                newHeight = maxHeight;
+                newWidth = newHeight * targetRatio;
+            }
+            canvas.width = Math.floor(newWidth);
+            canvas.height = Math.floor(newHeight);
+        }
+
     } else {
+        // Desktop fisso
         if (currentGame === 'tetris') {
             canvas.width = 300; canvas.height = 600;
         } else {
@@ -319,29 +345,46 @@ function initGame(gameName) {
 
     scoreElement.innerText = 'SCORE: 0';
 
+    // --- INIZIALIZZAZIONE GIOCHI CON DIMENSIONI PROPORZIONALI ---
+
     if (currentGame === 'snake') {
         gameTitleDisplay.innerText = (snakeSpeed < 100) ? "SNAKE HARDCORE" : "SNAKE 2.0";
-        tileCountX = Math.floor(canvas.width / gridSize);
+        
+        // Griglia dinamica
+        tileCountX = 20; // Manteniamo 20 colonne
+        gridSize = canvas.width / tileCountX; 
         tileCountY = Math.floor(canvas.height / gridSize);
         
         snakeScore = 0;
         snake = [{x: 10, y: 10}];
         velocityX = 1; velocityY = 0;
         placeFood();
+
     } else if (currentGame === 'pong') {
         gameTitleDisplay.innerText = "NEON PONG";
         pongScore = 0;
+        
+        paddleWidth = canvas.width * 0.03; 
+        paddleHeight = canvas.height * 0.15; 
+        
         resetBall();
         paddle1Y = canvas.height / 2 - paddleHeight / 2;
         paddle2Y = canvas.height / 2 - paddleHeight / 2;
+
     } else if (currentGame === 'tetris') {
         gameTitleDisplay.innerText = "CYBER TETRIS";
         tetrisArena = createMatrix(tetrisCol, tetrisRow);
         tetrisScore = 0;
         playerReset();
+
     } else if (currentGame === 'invaders') {
         gameTitleDisplay.innerText = "CYBER INVADERS";
-        initInvaders(true); // Reset completo per nuova partita
+        
+        invPlayer.w = canvas.width * 0.08; // Leggermente più piccolo su schermi larghi
+        invPlayer.h = invPlayer.w * 0.6;
+        invPlayer.speed = canvas.width * 0.015;
+
+        initInvaders(true); 
     }
 
     startGame();
@@ -388,28 +431,29 @@ function gameLoop() {
 }
 
 // ==========================================
-// LOGICA INVADERS
+// LOGICA INVADERS (RESPONSIVE)
 // ==========================================
 function initInvaders(resetScore = true) {
     if (resetScore) {
         invScore = 0;
-        invEnemySpeed = 1; // Reset velocità solo se nuova partita
+        invEnemySpeed = canvas.width * 0.003; 
         scoreElement.innerText = 'SCORE: 0';
     }
     
     invBullets = [];
     invEnemies = [];
     invPlayer.x = canvas.width / 2 - invPlayer.w / 2;
-    invPlayer.y = canvas.height - 40;
+    invPlayer.y = canvas.height - (invPlayer.h * 2);
     invEnemyDir = 1;
     
-    let startX = 20;
-    let startY = 20;
-    let enemyW = 25;
-    let enemyH = 20;
-    let gap = 10;
+    // Adatta numero colonne in base alla larghezza
+    let cols = (canvas.width < 400) ? 6 : 10; // Più nemici su tablet orizzontale
+    let gap = canvas.width * 0.02;
+    let enemyW = (canvas.width - (gap * (cols + 2))) / cols; 
+    let enemyH = enemyW * 0.8;
     
-    let cols = (canvas.width < 350) ? 6 : 8;
+    let startX = gap;
+    let startY = gap * 2;
 
     for(let r=0; r<invEnemyRows; r++) {
         for(let c=0; c<cols; c++) {
@@ -426,11 +470,10 @@ function initInvaders(resetScore = true) {
 function updateInvaders() {
     // Proiettili
     for(let i = invBullets.length - 1; i >= 0; i--) {
-        invBullets[i].y -= 7;
+        invBullets[i].y -= (canvas.height * 0.015); 
         if(invBullets[i].y < 0) invBullets.splice(i, 1);
     }
 
-    // Calcolo bordi attuali del gruppo nemici
     let minX = canvas.width;
     let maxX = 0;
     let lowestEnemy = 0;
@@ -442,20 +485,15 @@ function updateInvaders() {
         if(e.y + e.h > lowestEnemy) lowestEnemy = e.y + e.h;
     });
 
-    // CAMBIO DIREZIONE CASUALE (Jitter)
     if (minX > 10 && maxX < canvas.width - 10) {
-        if (Math.random() < 0.02) { 
-            invEnemyDir *= -1;
-        }
+        if (Math.random() < 0.02) invEnemyDir *= -1;
     }
 
-    // Movimento
     invEnemies.forEach(e => {
         if(!e.alive) return;
         e.x += invEnemySpeed * invEnemyDir;
     });
 
-    // Controllo Bordi
     let hitEdge = false;
     invEnemies.forEach(e => {
         if(!e.alive) return;
@@ -466,11 +504,10 @@ function updateInvaders() {
         invEnemyDir *= -1; 
         invEnemies.forEach(e => {
             e.x += invEnemySpeed * invEnemyDir; 
-            e.y += invEnemyDrop; 
+            e.y += (canvas.height * 0.02); 
         });
     }
 
-    // Collisioni Proiettili
     invBullets.forEach((b, bIdx) => {
         invEnemies.forEach(e => {
             if(e.alive && b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
@@ -482,13 +519,11 @@ function updateInvaders() {
         });
     });
 
-    // Game Over o Livello Successivo
     if(lowestEnemy >= invPlayer.y) gameOver();
     
     if(invEnemies.filter(e => e.alive).length === 0) {
-        // LIVELLO COMPLETATO
-        invEnemySpeed += 0.5; // Aumenta difficoltà
-        initInvaders(false); // NON resettare il punteggio
+        invEnemySpeed += (canvas.width * 0.001); 
+        initInvaders(false); 
     }
 }
 
@@ -511,21 +546,21 @@ function drawInvaders() {
             ctx.shadowBlur = 10; ctx.shadowColor = '#ff0055';
             ctx.fillRect(e.x, e.y, e.w, e.h);
             ctx.fillStyle = '#000'; ctx.shadowBlur = 0;
-            ctx.fillRect(e.x + 5, e.y + 5, 5, 5);
-            ctx.fillRect(e.x + e.w - 10, e.y + 5, 5, 5);
+            ctx.fillRect(e.x + (e.w*0.2), e.y + (e.h*0.2), e.w*0.2, e.h*0.2);
+            ctx.fillRect(e.x + e.w - (e.w*0.4), e.y + (e.h*0.2), e.w*0.2, e.h*0.2);
         }
     });
 
     ctx.fillStyle = '#ffff00';
     ctx.shadowBlur = 10; ctx.shadowColor = '#ffff00';
     invBullets.forEach(b => {
-        ctx.fillRect(b.x, b.y, 4, 10);
+        ctx.fillRect(b.x, b.y, canvas.width * 0.01, canvas.height * 0.02);
     });
     ctx.shadowBlur = 0;
 }
 
 // ==========================================
-// LOGICA TETRIS (Invariata)
+// LOGICA TETRIS (Invariata ma usa canvas.width)
 // ==========================================
 function createMatrix(w, h) {
     const matrix = [];
@@ -660,7 +695,7 @@ function updateTetris(time = 0) {
 }
 
 // ==========================================
-// LOGICA SNAKE & PONG
+// LOGICA SNAKE & PONG (Aggiornata per Responsive)
 // ==========================================
 
 function updateSnake() {
@@ -750,11 +785,9 @@ function updatePong() {
 }
 
 function drawPong() {
-    // Sfondo
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Linea centrale
     ctx.strokeStyle = '#333';
     ctx.beginPath();
     ctx.setLineDash([10, 10]);
@@ -763,21 +796,18 @@ function drawPong() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Paddle 1 (Giocatore)
     ctx.fillStyle = '#00ffea';
     ctx.shadowBlur = 15; ctx.shadowColor = '#00ffea';
     ctx.fillRect(0, paddle1Y, paddleWidth, paddleHeight);
     
-    // Paddle 2 (AI)
     ctx.fillStyle = '#ff0055';
     ctx.shadowBlur = 15; ctx.shadowColor = '#ff0055';
     ctx.fillRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
     
-    // Palla
     ctx.fillStyle = '#fff';
     ctx.shadowBlur = 10; ctx.shadowColor = '#fff';
     ctx.beginPath();
-    ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+    ctx.arc(ballX, ballY, canvas.width * 0.02, 0, Math.PI * 2); // Palla proporzionale
     ctx.fill();
     
     ctx.shadowBlur = 0;
@@ -790,7 +820,7 @@ function resetBall() {
 
 function gameOver() {
     stopGame();
-    saveCurrentGameScore(); // Salva il punteggio
+    saveCurrentGameScore();
 
     ctx.fillStyle = 'rgba(0,0,0,0.8)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
