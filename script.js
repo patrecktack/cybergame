@@ -62,6 +62,7 @@ let currentGame = null;
 let currentMode = null; 
 let gameInterval;
 let isGameRunning = false;
+let frameCount = 0; // Contatore frame per gestire frequenza sparo
 
 // --- VARIABILI SNAKE ---
 let gridSize = 20; 
@@ -107,9 +108,12 @@ let invEnemySpeed = 1;
 let invEnemyDrop = 10; 
 let invScore = 0;
 
-// ==========================================
+// Tracciamento tasti premuti
+const keysPressed = {};
+
+// ====
 // GESTIONE MENU E NAVIGAZIONE
-// ==========================================
+// ====
 
 btnDesktop.addEventListener('click', () => setInterface('desktop'));
 btnMobile.addEventListener('click', () => setInterface('mobile'));
@@ -200,9 +204,9 @@ btnRetry.addEventListener('click', () => {
     startGame();
 });
 
-// ==========================================
+// ====
 // LEADERBOARD LOGIC
-// ==========================================
+// ====
 btnShowLeaderboardMain.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     leaderboardScreen.classList.remove('hidden');
@@ -268,9 +272,9 @@ function showLeaderboard(game) {
     }
 }
 
-// ==========================================
+// ====
 // INIT GIOCO (RESPONSIVE TABLET LANDSCAPE)
-// ==========================================
+// ====
 
 function initGame(gameName) {
     currentGame = gameName;
@@ -390,13 +394,14 @@ function initGame(gameName) {
     startGame();
 }
 
-// ==========================================
+// ====
 // LOOP DI GIOCO
-// ==========================================
+// ====
 
 function startGame() {
     stopGame();
     isGameRunning = true;
+    frameCount = 0; // Resetta il contatore frame
     
     if (currentGame === 'tetris') {
         lastTime = 0;
@@ -418,6 +423,7 @@ function stopGame() {
 }
 
 function gameLoop() {
+    frameCount++; // Incrementa il contatore ad ogni frame
     if (currentGame === 'snake') {
         updateSnake();
         drawSnake();
@@ -430,9 +436,9 @@ function gameLoop() {
     }
 }
 
-// ==========================================
-// LOGICA INVADERS (RESPONSIVE)
-// ==========================================
+// ====
+// LOGICA INVADERS (RESPONSIVE) con Sparo Automatico
+// ====
 function initInvaders(resetScore = true) {
     if (resetScore) {
         invScore = 0;
@@ -468,7 +474,33 @@ function initInvaders(resetScore = true) {
 }
 
 function updateInvaders() {
-    // Proiettili
+    // Gestione Input Continui (Movimento + Sparo Automatico)
+    if (isGameRunning) {
+        // Movimento Sinistra
+        if (keysPressed['ArrowLeft'] || keysPressed['KeyA']) {
+            invPlayer.x -= invPlayer.speed;
+            if (invPlayer.x < 0) invPlayer.x = 0;
+        }
+        
+        // Movimento Destra
+        if (keysPressed['ArrowRight'] || keysPressed['KeyD']) {
+            invPlayer.x += invPlayer.speed;
+            if (invPlayer.x + invPlayer.w > canvas.width) invPlayer.x = canvas.width - invPlayer.w;
+        }
+        
+        // Sparo Automatico se si muove o se preme Up/W/Space
+        if ((keysPressed['ArrowLeft'] || keysPressed['KeyA'] || 
+             keysPressed['ArrowRight'] || keysPressed['KeyD'] ||
+             keysPressed['ArrowUp'] || keysPressed['KeyW'] || keysPressed['Space'])) {
+            
+            // Limita la frequenza di sparo (ogni 15 frame)
+            if (frameCount % 15 === 0) { 
+                invBullets.push({x: invPlayer.x + invPlayer.w/2 - 2, y: invPlayer.y});
+            }
+        }
+    }
+
+    // Aggiornamento Proiettili
     for(let i = invBullets.length - 1; i >= 0; i--) {
         invBullets[i].y -= (canvas.height * 0.015); 
         if(invBullets[i].y < 0) invBullets.splice(i, 1);
@@ -559,9 +591,9 @@ function drawInvaders() {
     ctx.shadowBlur = 0;
 }
 
-// ==========================================
+// ====
 // LOGICA TETRIS (Invariata ma usa canvas.width)
-// ==========================================
+// ====
 function createMatrix(w, h) {
     const matrix = [];
     while (h--) matrix.push(new Array(w).fill(0));
@@ -694,9 +726,9 @@ function updateTetris(time = 0) {
     requestAnimationFrame(updateTetris);
 }
 
-// ==========================================
+// ====
 // LOGICA SNAKE & PONG (Aggiornata per Responsive)
-// ==========================================
+// ====
 
 function updateSnake() {
     const head = {x: snake[0].x + velocityX, y: snake[0].y + velocityY};
@@ -831,15 +863,15 @@ function gameOver() {
     ctx.fillText('Premi RETRY o EXIT', canvas.width / 2, canvas.height / 2 + 30);
 }
 
-// ==========================================
+// ====
 // INPUT CONTROLLER
-// ==========================================
+// ====
 function inputUp() {
     if (currentGame === 'snake' && velocityY !== 1) { velocityX = 0; velocityY = -1; }
     if (currentGame === 'pong' && paddle1Y > 0) { paddle1Y -= 20; }
     if (currentGame === 'tetris') { playerRotate(1); }
     if (currentGame === 'invaders') { 
-        invBullets.push({x: invPlayer.x + invPlayer.w/2 - 2, y: invPlayer.y});
+        // Non usato più per lo sparo automatico
     }
 }
 function inputDown() {
@@ -851,16 +883,14 @@ function inputLeft() {
     if (currentGame === 'snake' && velocityX !== 1) { velocityX = -1; velocityY = 0; } 
     if (currentGame === 'tetris') { playerMove(-1); }
     if (currentGame === 'invaders') { 
-        invPlayer.x -= invPlayer.speed; 
-        if(invPlayer.x < 0) invPlayer.x = 0;
+        // Gestito nel loop principale per lo sparo continuo
     }
 }
 function inputRight() { 
     if (currentGame === 'snake' && velocityX !== -1) { velocityX = 1; velocityY = 0; } 
     if (currentGame === 'tetris') { playerMove(1); }
     if (currentGame === 'invaders') { 
-        invPlayer.x += invPlayer.speed; 
-        if(invPlayer.x + invPlayer.w > canvas.width) invPlayer.x = canvas.width - invPlayer.w;
+        // Gestito nel loop principale per lo sparo continuo
     }
 }
 
@@ -874,46 +904,23 @@ btnDown.addEventListener('click', inputDown);
 btnLeft.addEventListener('click', inputLeft);
 btnRight.addEventListener('click', inputRight);
 
+// Nuovi listener per tracciare i tasti premuti
 document.addEventListener('keydown', (e) => {
+    keysPressed[e.code] = true;
+    
+    // Gestione tasto Space per Retry o Hard Drop (azioni singole)
     if (e.code === 'Space') {
         if (!isGameRunning && !gameWrapper.classList.contains('hidden')) {
             btnRetry.click();
-            return;
-        }
-        if (isGameRunning && currentGame === 'tetris') {
+        } else if (isGameRunning && currentGame === 'tetris') {
             e.preventDefault(); 
             playerHardDrop();
-            return;
-        }
-        if (isGameRunning && currentGame === 'invaders') {
-            e.preventDefault();
-            inputUp(); // Spara
-            return;
         }
     }
+});
 
-    if (currentGame === 'pong') {
-        if (e.code === 'KeyW' || e.code === 'ArrowUp') paddle1Y -= 20;
-        if (e.code === 'KeyS' || e.code === 'ArrowDown') paddle1Y += 20;
-        if (paddle1Y < 0) paddle1Y = 0;
-        if (paddle1Y > canvas.height - paddleHeight) paddle1Y = canvas.height - paddleHeight;
-    } else if (currentGame === 'snake') {
-        switch (e.code) {
-            case 'KeyA': case 'ArrowLeft': inputLeft(); break;
-            case 'KeyW': case 'ArrowUp': inputUp(); break;
-            case 'KeyD': case 'ArrowRight': inputRight(); break;
-            case 'KeyS': case 'ArrowDown': inputDown(); break;
-        }
-    } else if (currentGame === 'tetris') {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') playerMove(-1);
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') playerMove(1);
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') playerDrop();
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') playerRotate(1);
-    } else if (currentGame === 'invaders') {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') inputLeft();
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') inputRight();
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') inputUp(); // Spara
-    }
+document.addEventListener('keyup', (e) => {
+    keysPressed[e.code] = false;
 });
 
 // GESTIONE PULSANTE MUSIC
