@@ -9,102 +9,98 @@
 </head>
 <body>
 
+    <!-- SFONDO ANIMATO -->
     <div class="scanline"></div>
+    <div class="background-city"></div>
 
-    <!-- 1. MENU PRINCIPALE -->
-    <div id="main-menu">
-        <h1>CYBER ARCADE</h1>
+    <!-- MENU PRINCIPALE -->
+    <div id="main-menu" class="menu-container">
+        <h1 class="glitch-title">CYBER ARCADE</h1>
         <p class="subtitle">SELECT INTERFACE</p>
         
-        <div class="mode-selection">
+        <div class="menu-buttons">
             <button id="btn-desktop" class="mode-btn">DESKTOP</button>
             <button id="btn-mobile" class="mode-btn">MOBILE</button>
-            <button id="btn-music-toggle" class="mode-btn">MUSIC: ON</button>
-            <button id="btn-show-leaderboard-main" class="mode-btn" style="border-color: #bc13fe; color: #bc13fe;">TOP SCORE</button>
+        </div>
+
+        <div class="options-row">
+            <button id="btn-music-toggle" class="small-btn">MUSIC: ON</button>
+            <button id="btn-show-leaderboard-main" class="small-btn">TOP SCORE</button>
         </div>
     </div>
 
-    <!-- 2. SELEZIONE GIOCO -->
-    <div id="game-selector" class="hidden">
-        <h1>SELECT GAME</h1>
+    <!-- SCHERMATA SELEZIONE GIOCO -->
+    <div id="game-selector" class="menu-container hidden">
+        <h1 class="glitch-title">SELECT GAME</h1>
         
-        <!-- INPUT NOME GIOCATORE: Max 25 lettere (riempie la barra) -->
-        <div class="input-container">
-            <input type="text" id="player-name-input" placeholder="ENTER NAME" maxlength="22">
+        <input type="text" id="player-name-input" placeholder="ENTER NAME" maxlength="10">
+
+        <div class="game-grid">
+            <button id="btn-pre-snake" class="game-btn">SNAKE 2.0</button>
+            <button id="btn-play-pong" class="game-btn">NEON PONG</button>
+            <button id="btn-play-tetris" class="game-btn">CYBER TETRIS</button>
+            <button id="btn-play-invaders" class="game-btn">CYBER INVADERS</button>
         </div>
 
-        <div class="mode-selection">
-            <button id="btn-pre-snake" class="mode-btn">SNAKE 2.0</button>
-            <button id="btn-play-pong" class="mode-btn">NEON PONG</button>
-            <button id="btn-play-tetris" class="mode-btn">CYBER TETRIS</button>
-            <button id="btn-play-invaders" class="mode-btn">CYBER INVADERS</button>
-            
-            <button id="back-to-main" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">BACK</button>
-        </div>
+        <button id="back-to-main" class="mode-btn red-btn">BACK</button>
     </div>
 
-    <!-- 2b. SELEZIONE DIFFICOLTA SNAKE -->
-    <div id="snake-difficulty" class="hidden">
-        <h1>SNAKE MODE</h1>
-        <div class="mode-selection">
-            <button id="btn-snake-normal" class="mode-btn" style="border-color: #00ffea; color: #00ffea;">NORMAL</button>
-            <button id="btn-snake-hard" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">HARDCORE</button>
-            <button id="back-to-games" class="mode-btn">BACK</button>
+    <!-- SCHERMATA DIFFICOLTA' SNAKE -->
+    <div id="snake-difficulty" class="menu-container hidden">
+        <h1 class="glitch-title">SNAKE MODE</h1>
+        <div class="menu-buttons">
+            <button id="btn-snake-normal" class="mode-btn cyan-btn">NORMAL</button>
+            <button id="btn-snake-hard" class="mode-btn red-btn">HARDCORE</button>
         </div>
+        <button id="back-to-games" class="mode-btn">BACK</button>
     </div>
 
-    <!-- 2c. SCHERMATA CLASSIFICA -->
-    <div id="leaderboard-screen" class="hidden">
-        <h1>TOP SCORES</h1>
+    <!-- SCHERMATA LEADERBOARD -->
+    <div id="leaderboard-screen" class="menu-container hidden">
+        <h1 class="glitch-title">TOP SCORES</h1>
+        
         <div class="leaderboard-tabs">
-            <button id="tab-snake" class="tab-btn active">SNAKE</button>
-            <button id="tab-pong" class="tab-btn">PONG</button>
-            <button id="tab-tetris" class="tab-btn">TETRIS</button>
-            <button id="tab-invaders" class="tab-btn">INVADERS</button>
+            <button class="tab-btn active" id="tab-snake">SNAKE</button>
+            <button class="tab-btn" id="tab-pong">PONG</button>
+            <button class="tab-btn" id="tab-tetris">TETRIS</button>
+            <button class="tab-btn" id="tab-invaders">INVADERS</button>
         </div>
-        <div id="leaderboard-list">
-            <!-- I punteggi verranno inseriti qui via JS -->
+
+        <div id="leaderboard-list" class="leaderboard-list">
+            <!-- Punteggi inseriti via JS -->
         </div>
-        <div class="mode-selection">
-            <button id="back-from-leaderboard" class="mode-btn">BACK</button>
-        </div>
+
+        <button id="back-from-leaderboard" class="mode-btn">BACK</button>
     </div>
-    
-    <!-- 3. AREA DI GIOCO -->
+
+    <!-- AREA DI GIOCO -->
     <div id="game-wrapper" class="hidden">
         <h1 id="game-title-display">GAME</h1>
-        
-        <div id="game-container">
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
-        </div>
-        
         <div id="score">SCORE: 0</div>
         
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        
+        <div id="desktop-hint" class="hint-text">USA W, A, S, D o FRECCE per muoverti</div>
+
         <!-- CONTROLLI MOBILE -->
         <div id="mobile-controls" class="hidden">
-            <div class="control-row">
+            <div class="d-pad-row">
                 <button id="btn-up" class="d-pad">▲</button>
             </div>
-            <div class="control-row">
+            <div class="d-pad-row">
                 <button id="btn-left" class="d-pad">◀</button>
                 <button id="btn-down" class="d-pad">▼</button>
                 <button id="btn-right" class="d-pad">▶</button>
             </div>
         </div>
 
-        <!-- PULSANTI DI GIOCO -->
         <div class="game-buttons">
-            <button id="retry-btn" class="mode-btn" style="border-color: #00ffea; color: #00ffea;">RETRY</button>
-            <button id="exit-game-btn" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">EXIT</button>
-        </div>
-
-        <!-- INFO COMANDI -->
-        <div id="desktop-hint" class="controls-hint hidden">
-            Usa W, A, S, D per muoverti<br>
-            SPAZIO o SU per sparare (Invaders)
+            <button id="retry-btn" class="mode-btn cyan-btn">RETRY</button>
+            <button id="exit-game-btn" class="mode-btn red-btn">EXIT</button>
         </div>
     </div>
 
+    <!-- AUDIO -->
     <audio id="bg-music" loop>
         <source src="music.mp3" type="audio/mpeg">
     </audio>
