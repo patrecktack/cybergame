@@ -91,7 +91,8 @@ function showLeaderboard(game) {
 // NAVIGAZIONE & CONTROLLI MENU
 btnPlayMain.addEventListener('click', () => {
     currentMode = detectDevice();
-    currentPlayerName = playerNameInput.value.trim().toUpperCase() || "PLAYER";
+    currentPlayerName = (playerNameInput.value || '').trim().toUpperCase() || "PLAYER";
+    localStorage.setItem('cyberarcade_player', currentPlayerName);
     mainMenu.classList.add('hidden');
     gameSelector.classList.remove('hidden');
 
@@ -315,7 +316,6 @@ window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') { btnRetry.click(); }
         return;
     }
-    // Snake controls
     if (currentGame === 'snake') {
         if (e.code === 'KeyW' || e.code === 'ArrowUp') inputUp();
         if (e.code === 'KeyS' || e.code === 'ArrowDown') inputDown();
