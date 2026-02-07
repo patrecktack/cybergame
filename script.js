@@ -1,165 +1,365 @@
+// ELEMENTI UI
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const gameTitleDisplay = document.getElementById('game-title-display');
 
-// Schermate
 const mainMenu = document.getElementById('main-menu');
 const gameSelector = document.getElementById('game-selector');
 const snakeDifficultyScreen = document.getElementById('snake-difficulty');
 const gameWrapper = document.getElementById('game-wrapper');
 const leaderboardScreen = document.getElementById('leaderboard-screen');
+
 const playerNameInput = document.getElementById('player-name-input');
 
-let currentPlayerName = "PLAYER";
-let currentGame = null; 
-let currentMode = null; 
-let gameInterval;
-let isGameRunning = false;
+const btnDesktop = document.getElementById('btn-desktop');
+const btnMobile = document.getElementById('btn-mobile');
+const btnMusicToggle = document.getElementById('btn-music-toggle');
+const btnShowLeaderboardMain = document.getElementById('btn-show-leaderboard-main');
 
-// --- LOGICA CLASSIFICA LOCALE ---
+const btnPreSnake = document.getElementById('btn-pre-snake');
+const btnPlayPong = document.getElementById('btn-play-pong');
+const btnBackToMain = document.getElementById('back-to-main');
+
+const btnSnakeNormal = document.getElementById('btn-snake-normal');
+const btnSnakeHard = document.getElementById('btn-snake-hard');
+const btnBackToGames = document.getElementById('back-to-games');
+
+const tabSnake = document.getElementById('tab-snake');
+const tabPong = document.getElementById('tab-pong');
+const leaderboardList = document.getElementById('leaderboard-list');
+const btnBackFromLeaderboard = document.getElementById('back-from-leaderboard');
+
+const mobileControls = document.getElementById('mobile-controls');
+const desktopHint = document.getElementById('desktop-hint');
+const btnUp = document.getElementById('btn-up');
+const btnDown = document.getElementById('btn-down');
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+
+const btnRetry = document.getElementById('retry-btn');
+const btnExitGame = document.getElementById('exit-game-btn');
+
+const bgMusic = document.getElementById('bg-music');
+
+// STATO
+let currentPlayerName = "PLAYER";
+let currentMode = null; // 'desktop' o 'mobile'
+let currentGame = null; // 'snake' o 'pong'
+let gameInterval = null;
+let isGameRunning = false;
+let isMusicOn = true;
+
+// SNAKE VARS
+let snake = [], food = {}, velocityX = 1, velocityY = 0, snakeScore = 0, snakeSpeed = 150;
+let tileCountX = 20, tileCountY = 20, gridSize = 20;
+
+// PONG VARS
+let paddle1Y = 150, paddle2Y = 150, paddleHeight = 80, paddleWidth = 10;
+let ballX = 200, ballY = 200, ballSpeedX = 5, ballSpeedY = 5, pongScore = 0;
+
+// SALVATAGGIO LOCALE
 function saveScoreLocal(game, score) {
     if (score <= 0) return;
-    let scores = JSON.parse(localStorage.getItem('scores_' + game)) || [];
+    const key = 'scores_' + game;
+    const scores = JSON.parse(localStorage.getItem(key) || '[]');
     scores.push({ name: currentPlayerName, score: score });
     scores.sort((a, b) => b.score - a.score);
-    scores = scores.slice(0, 5); // Tieni solo i primi 5
-    localStorage.setItem('scores_' + game, JSON.stringify(scores));
+    localStorage.setItem(key, JSON.stringify(scores.slice(0, 5)));
 }
 
 function showLeaderboard(game) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + game).classList.add('active');
-    
-    const list = document.getElementById('leaderboard-list');
-    let scores = JSON.parse(localStorage.getItem('scores_' + game)) || [];
-    list.innerHTML = scores.length ? '' : '<p>NO SCORES YET</p>';
-    scores.forEach((s, i) => {
-        list.innerHTML += `<div class="score-entry"><span>${i+1}. ${s.name}</span><span>${s.score}</span></div>`;
+    tabSnake.classList.remove('active'); tabPong.classList.remove('active');
+    if (game === 'snake') tabSnake.classList.add('active'); else tabPong.classList.add('active');
+    const key = 'scores_' + game;
+    const scores = JSON.parse(localStorage.getItem(key) || '[]');
+    leaderboardList.innerHTML = scores.length ? '' : '<div style="text-align:center;color:#888">NO SCORES YET</div>';
+    scores.forEach((s,i) => {
+        const div = document.createElement('div'); div.className = 'score-entry';
+        div.innerHTML = `<span>${i+1}. ${s.name}</span><span>${s.score}</span>`;
+        leaderboardList.appendChild(div);
     });
 }
 
-// --- NAVIGAZIONE ---
-document.getElementById('btn-desktop').onclick = () => setInterface('desktop');
-document.getElementById('btn-mobile').onclick = () => setInterface('mobile');
+// NAVIGAZIONE & CONTROLLI MENU
 
-function setInterface(mode) {
-    currentMode = mode;
+btnDesktop.addEventListener('click', () => {
+    currentMode = 'desktop';
+    currentPlayerName = (playerNameInput.value || '').trim().toUpperCase() || "PLAYER";
+    localStorage.setItem('cyberarcade_player', currentPlayerName);
     mainMenu.classList.add('hidden');
     gameSelector.classList.remove('hidden');
-    document.getElementById('bg-music').play().catch(() => {});
-}
+    if (isMusicOn) {
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(()=>{});
+    }
+});
 
-document.getElementById('btn-pre-snake').onclick = () => {
-    currentPlayerName = playerNameInput.value.trim().toUpperCase() || "PLAYER";
-    gameSelector.classList.add('hidden');
-    snakeDifficultyScreen.classList.remove('hidden');
-};
+btnMobile.addEventListener('click', () => {
+    currentMode = 'mobile';
+    currentPlayerName = (playerNameInput.value || '').trim().toUpperCase() || "PLAYER";
+    localStorage.setItem('cyberarcade_player', currentPlayerName);
+    mainMenu.classList.add('hidden');
+    gameSelector.classList.remove('hidden');
+    if (isMusicOn) {
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(()=>{});
+    }
+});
 
-document.getElementById('btn-play-pong').onclick = () => {
-    currentPlayerName = playerNameInput.value.trim().toUpperCase() || "PLAYER";
-    initGame('pong');
-};
-
-document.getElementById('btn-snake-normal').onclick = () => { snakeSpeed = 150; initGame('snake'); };
-document.getElementById('btn-snake-hard').onclick = () => { snakeSpeed = 70; initGame('snake'); };
-
-document.getElementById('btn-show-leaderboard-main').onclick = () => {
+btnShowLeaderboardMain.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     leaderboardScreen.classList.remove('hidden');
     showLeaderboard('snake');
-};
-
-document.getElementById('tab-snake').onclick = () => showLeaderboard('snake');
-document.getElementById('tab-pong').onclick = () => showLeaderboard('pong');
-document.getElementById('back-from-leaderboard').onclick = () => {
+});
+btnBackFromLeaderboard.addEventListener('click', () => {
     leaderboardScreen.classList.add('hidden');
     mainMenu.classList.remove('hidden');
-};
+});
 
-document.getElementById('exit-game-btn').onclick = () => {
-    if (currentGame === 'snake') saveScoreLocal('snake', snakeScore);
-    else saveScoreLocal('pong', pongScore);
-    stopGame();
-    gameWrapper.classList.add('hidden');
-    gameSelector.classList.remove('hidden');
-};
+btnPreSnake.addEventListener('click', () => { gameSelector.classList.add('hidden'); snakeDifficultyScreen.classList.remove('hidden'); });
+btnBackToMain.addEventListener('click', () => { gameSelector.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
 
-document.getElementById('retry-btn').onclick = () => initGame(currentGame);
+btnSnakeNormal.addEventListener('click', () => { snakeSpeed = 150; initGame('snake'); });
+btnSnakeHard.addEventListener('click', () => { snakeSpeed = 70; initGame('snake'); });
 
-// --- LOGICA GIOCHI (SNAKE & PONG) ---
-let snake = [], food = {}, velocityX = 1, velocityY = 0, snakeScore = 0, snakeSpeed = 150;
-let paddle1Y, paddle2Y, ballX, ballY, ballSpeedX, ballSpeedY, pongScore = 0;
-const gridSize = 20, paddleHeight = 80, paddleWidth = 10;
+btnPlayPong.addEventListener('click', () => initGame('pong'));
+btnBackToGames.addEventListener('click', () => { snakeDifficultyScreen.classList.add('hidden'); gameSelector.classList.remove('hidden'); });
 
-function initGame(game) {
-    currentGame = game;
-    gameSelector.classList.add('hidden');
-    snakeDifficultyScreen.classList.add('hidden');
-    gameWrapper.classList.remove('hidden');
-    
-    canvas.width = 400; canvas.height = 400;
-    document.getElementById('mobile-controls').className = (currentMode === 'mobile') ? '' : 'hidden';
-    
-    if (game === 'snake') {
-        snake = [{x: 10, y: 10}]; velocityX = 1; velocityY = 0; snakeScore = 0;
-        food = {x: 15, y: 15};
+// TAB CLASSIFICA
+tabSnake.addEventListener('click', () => showLeaderboard('snake'));
+tabPong.addEventListener('click', () => showLeaderboard('pong'));
+
+// MUSIC TOGGLE
+btnMusicToggle.addEventListener('click', () => {
+    isMusicOn = !isMusicOn;
+    if (isMusicOn) {
+        btnMusicToggle.innerText = "MUSIC: ON";
+        btnMusicToggle.classList.remove('music-off');
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(()=>{});
     } else {
-        pongScore = 0; ballX = 200; ballY = 200; ballSpeedX = 5; ballSpeedY = 5;
-        paddle1Y = 160; paddle2Y = 160;
+        btnMusicToggle.innerText = "MUSIC: OFF";
+        btnMusicToggle.classList.add('music-off');
+        bgMusic.pause();
     }
+});
+
+// AVVIO GIOCO
+function initGame(gameName) {
+    currentGame = gameName;
+    gameSelector.classList.add('hidden'); snakeDifficultyScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden');
+    gameWrapper.classList.remove('hidden');
+
+    // dimensioni canvas e controlli in base alla modalità scelta
+    if (currentMode === 'mobile') {
+        const maxW = Math.floor(window.innerWidth * 0.92);
+        canvas.width = maxW;
+        canvas.height = Math.floor(maxW * 0.9);
+        mobileControls.classList.remove('hidden');
+        desktopHint.classList.add('hidden');
+    } else {
+        canvas.width = 460;
+        canvas.height = 400;
+        mobileControls.classList.add('hidden');
+        desktopHint.classList.remove('hidden');
+    }
+
+    // inizializza stato specifico gioco
+    if (currentGame === 'snake') {
+        gameTitleDisplay.innerText = snakeSpeed < 100 ? 'SNAKE HARDCORE' : 'SNAKE 2.0';
+        tileCountX = 20;
+        gridSize = Math.floor(canvas.width / tileCountX);
+        tileCountY = Math.floor(canvas.height / gridSize);
+        snake = [{x:10,y:10}];
+        velocityX = 1; velocityY = 0; snakeScore = 0;
+        placeFood();
+        scoreElement.innerText = 'SCORE: 0';
+    } else if (currentGame === 'pong') {
+        gameTitleDisplay.innerText = 'NEON PONG';
+        pongScore = 0;
+        paddleWidth = Math.max(8, Math.floor(canvas.width * 0.03));
+        paddleHeight = Math.max(50, Math.floor(canvas.height * 0.16));
+        paddle1Y = canvas.height/2 - paddleHeight/2;
+        paddle2Y = canvas.height/2 - paddleHeight/2;
+        resetBall();
+        scoreElement.innerText = 'SCORE: 0';
+    }
+
     startGame();
 }
 
 function startGame() {
-    if (gameInterval) clearInterval(gameInterval);
+    stopGame();
     isGameRunning = true;
-    gameInterval = setInterval(gameLoop, currentGame === 'snake' ? snakeSpeed : 30);
-}
-
-function stopGame() { isGameRunning = false; clearInterval(gameInterval); }
-
-function gameLoop() {
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (currentGame === 'snake') {
-        let head = {x: snake[0].x + velocityX, y: snake[0].y + velocityY};
-        if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.some(p => p.x === head.x && p.y === head.y)) return gameOver();
-        snake.unshift(head);
-        if (head.x === food.x && head.y === food.y) { snakeScore += 10; food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20)}; }
-        else snake.pop();
-        ctx.fillStyle = '#00ffea'; snake.forEach(p => ctx.fillRect(p.x*20, p.y*20, 18, 18));
-        ctx.fillStyle = '#ff0055'; ctx.fillRect(food.x*20, food.y*20, 18, 18);
-        scoreElement.innerText = "SCORE: " + snakeScore;
+        gameInterval = setInterval(gameLoop, snakeSpeed);
     } else {
-        ballX += ballSpeedX; ballY += ballSpeedY;
-        if (ballY < 0 || ballY > 400) ballSpeedY *= -1;
-        if (ballX < 20 && ballY > paddle1Y && ballY < paddle1Y + 80) ballSpeedX *= -1;
-        if (ballX > 380 && ballY > paddle2Y && ballY < paddle2Y + 80) ballSpeedX *= -1;
-        if (ballX < 0 || ballX > 400) return gameOver();
-        paddle2Y += (ballY - (paddle2Y + 40)) * 0.1;
-        ctx.fillStyle = '#00ffea'; ctx.fillRect(10, paddle1Y, 10, 80);
-        ctx.fillStyle = '#ff0055'; ctx.fillRect(380, paddle2Y, 10, 80);
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ballX, ballY, 8, 0, Math.PI*2); ctx.fill();
-        scoreElement.innerText = "SCORE: " + pongScore;
+        gameInterval = setInterval(gameLoop, 30);
     }
+    if (isMusicOn) bgMusic.play().catch(()=>{});
+}
+function stopGame() { isGameRunning = false; if (gameInterval) clearInterval(gameInterval); }
+
+// GAME LOOP & LOGIC
+function gameLoop() {
+    if (currentGame === 'snake') { updateSnake(); drawSnake(); }
+    else if (currentGame === 'pong') { updatePong(); drawPong(); }
 }
 
+// SNAKE
+function placeFood() {
+    food.x = Math.floor(Math.random() * tileCountX);
+    food.y = Math.floor(Math.random() * tileCountY);
+}
+function updateSnake() {
+    const head = { x: snake[0].x + velocityX, y: snake[0].y + velocityY };
+    if (head.x < 0) head.x = tileCountX - 1;
+    if (head.x >= tileCountX) head.x = 0;
+    if (head.y < 0) head.y = tileCountY - 1;
+    if (head.y >= tileCountY) head.y = 0;
+    for (let i=0;i<snake.length;i++) if (head.x===snake[i].x && head.y===snake[i].y) { gameOver(); return; }
+    snake.unshift(head);
+    if (head.x===food.x && head.y===food.y) { snakeScore += 10; scoreElement.innerText = 'SCORE: ' + snakeScore; placeFood(); }
+    else snake.pop();
+}
+function drawSnake() {
+    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // griglia leggera
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 1;
+    for (let i=0;i<tileCountX;i++) { ctx.beginPath(); ctx.moveTo(i*gridSize,0); ctx.lineTo(i*gridSize,canvas.height); ctx.stroke(); }
+    for (let i=0;i<tileCountY;i++) { ctx.beginPath(); ctx.moveTo(0,i*gridSize); ctx.lineTo(canvas.width,i*gridSize); ctx.stroke(); }
+
+    snake.forEach((p,i) => {
+        ctx.fillStyle = i===0 ? '#00ffea' : 'rgba(0,255,234,0.5)';
+        ctx.shadowBlur = i===0 ? 14 : 0; ctx.shadowColor = ctx.fillStyle;
+        ctx.fillRect(p.x*gridSize+1, p.y*gridSize+1, gridSize-2, gridSize-2);
+        ctx.shadowBlur = 0;
+    });
+    ctx.fillStyle = '#ff0055'; ctx.shadowBlur = 12; ctx.shadowColor = '#ff0055';
+    ctx.fillRect(food.x*gridSize+1, food.y*gridSize+1, gridSize-2, gridSize-2);
+    ctx.shadowBlur = 0;
+}
+
+// PONG
+function resetBall() {
+    ballX = canvas.width/2; ballY = canvas.height/2;
+    ballSpeedX = (Math.random()>0.5?1:-1)*5; ballSpeedY = 3;
+}
+function updatePong() {
+    ballX += ballSpeedX; ballY += ballSpeedY;
+    if (ballY < 0 || ballY > canvas.height) ballSpeedY = -ballSpeedY;
+    // collisione con player
+    if (ballX < paddleWidth + 10) {
+        if (ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX; let delta = ballY - (paddle1Y + paddleHeight/2); ballSpeedY = delta * 0.12;
+        } else if (ballX < 0) { gameOver(); return; }
+    }
+    // collisione con AI
+    if (ballX > canvas.width - paddleWidth - 10) {
+        if (ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+        } else if (ballX > canvas.width) {
+            pongScore += 1; scoreElement.innerText = 'SCORE: ' + pongScore; resetBall();
+        }
+    }
+    // semplice AI
+    const aiCenter = paddle2Y + paddleHeight/2;
+    if (aiCenter < ballY - 20) paddle2Y += 4;
+    if (aiCenter > ballY + 20) paddle2Y -= 4;
+    paddle2Y = Math.max(0, Math.min(canvas.height - paddleHeight, paddle2Y));
+}
+function drawPong() {
+    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.setLineDash([10,10]); ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.beginPath();
+    ctx.moveTo(canvas.width/2,0); ctx.lineTo(canvas.width/2,canvas.height); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#00ffea'; ctx.shadowBlur = 14; ctx.shadowColor = '#00ffea'; ctx.fillRect(10, paddle1Y, paddleWidth, paddleHeight);
+    ctx.fillStyle = '#ff0055'; ctx.shadowBlur = 14; ctx.shadowColor = '#ff0055'; ctx.fillRect(canvas.width - paddleWidth - 10, paddle2Y, paddleWidth, paddleHeight);
+    ctx.fillStyle = '#fff'; ctx.shadowBlur = 10; ctx.shadowColor = '#fff'; ctx.beginPath(); ctx.arc(ballX, ballY, Math.max(6, canvas.width*0.02), 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    scoreElement.innerText = 'SCORE: ' + pongScore;
+}
+
+// GAME OVER
 function gameOver() {
     stopGame();
-    ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.fillRect(0,0,400,400);
-    ctx.fillStyle = "#ff0055"; ctx.font = "30px Orbitron"; ctx.textAlign = "center";
-    ctx.fillText("GAME OVER", 200, 200);
+    // salva punteggio
+    if (currentGame === 'snake') saveScoreLocal('snake', snakeScore);
+    else if (currentGame === 'pong') saveScoreLocal('pong', pongScore);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.76)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#ff0055'; ctx.font = '28px Orbitron'; ctx.textAlign = 'center'; ctx.shadowBlur = 12; ctx.shadowColor = '#ff0055';
+    ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 10);
+    ctx.fillStyle = '#00ffea'; ctx.font = '14px Orbitron'; ctx.shadowColor = '#00ffea';
+    ctx.fillText('RETRY or EXIT', canvas.width/2, canvas.height/2 + 22);
+    ctx.shadowBlur = 0;
 }
 
-// CONTROLLI
-window.onkeydown = (e) => {
-    if (e.key === 'w' || e.key === 'ArrowUp') { velocityX = 0; velocityY = -1; paddle1Y -= 20; }
-    if (e.key === 's' || e.key === 'ArrowDown') { velocityX = 0; velocityY = 1; paddle1Y += 20; }
-    if (e.key === 'a' || e.key === 'ArrowLeft') { velocityX = -1; velocityY = 0; }
-    if (e.key === 'd' || e.key === 'ArrowRight') { velocityX = 1; velocityY = 0; }
-};
+// CONTROLLI (TASTIERA E BOTTONI)
+function inputUp() {
+    if (currentGame === 'snake' && velocityY !== 1) { velocityX = 0; velocityY = -1; }
+    if (currentGame === 'pong') { paddle1Y = Math.max(0, paddle1Y - 30); }
+}
+function inputDown() {
+    if (currentGame === 'snake' && velocityY !== -1) { velocityX = 0; velocityY = 1; }
+    if (currentGame === 'pong') { paddle1Y = Math.min(canvas.height - paddleHeight, paddle1Y + 30); }
+}
+function inputLeft() { if (currentGame === 'snake' && velocityX !== 1) { velocityX = -1; velocityY = 0; } }
+function inputRight() { if (currentGame === 'snake' && velocityX !== -1) { velocityX = 1; velocityY = 0; } }
 
-document.getElementById('btn-up').onclick = () => { velocityX = 0; velocityY = -1; paddle1Y -= 30; };
-document.getElementById('btn-down').onclick = () => { velocityX = 0; velocityY = 1; paddle1Y += 30; };
-document.getElementById('btn-left').onclick = () => { velocityX = -1; velocityY = 0; };
-document.getElementById('btn-right').onclick = () => { velocityX = 1; velocityY = 0; };
+btnUp.addEventListener('touchstart', (e)=>{ e.preventDefault(); inputUp(); });
+btnDown.addEventListener('touchstart', (e)=>{ e.preventDefault(); inputDown(); });
+btnLeft.addEventListener('touchstart', (e)=>{ e.preventDefault(); inputLeft(); });
+btnRight.addEventListener('touchstart', (e)=>{ e.preventDefault(); inputRight(); });
+
+btnUp.addEventListener('click', inputUp); btnDown.addEventListener('click', inputDown);
+btnLeft.addEventListener('click', inputLeft); btnRight.addEventListener('click', inputRight);
+
+window.addEventListener('keydown', (e) => {
+    if (!isGameRunning) {
+        if (e.code === 'Space') { btnRetry.click(); }
+        return;
+    }
+    if (currentGame === 'snake') {
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') inputUp();
+        if (e.code === 'KeyS' || e.code === 'ArrowDown') inputDown();
+        if (e.code === 'KeyA' || e.code === 'ArrowLeft') inputLeft();
+        if (e.code === 'KeyD' || e.code === 'ArrowRight') inputRight();
+    } else if (currentGame === 'pong') {
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') paddle1Y = Math.max(0, paddle1Y - 30);
+        if (e.code === 'KeyS' || e.code === 'ArrowDown') paddle1Y = Math.min(canvas.height - paddleHeight, paddle1Y + 30);
+    }
+});
+
+// RETRY & EXIT
+btnRetry.addEventListener('click', () => {
+    if (!currentGame) return;
+    if (currentGame === 'snake') {
+        snake = [{x:10,y:10}]; velocityX = 1; velocityY = 0; snakeScore = 0; placeFood();
+    } else if (currentGame === 'pong') {
+        pongScore = 0; resetBall(); paddle1Y = canvas.height/2 - paddleHeight/2; paddle2Y = canvas.height/2 - paddleHeight/2;
+    }
+    startGame();
+});
+btnExitGame.addEventListener('click', () => {
+    if (currentGame === 'snake') saveScoreLocal('snake', snakeScore);
+    if (currentGame === 'pong') saveScoreLocal('pong', pongScore);
+    stopGame();
+    gameWrapper.classList.add('hidden');
+    gameSelector.classList.remove('hidden');
+});
+
+// Fallback: se chiudi o ricarichi, non perdere il nome
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('cyberarcade_player', currentPlayerName);
+});
+const storedName = localStorage.getItem('cyberarcade_player'); if (storedName) playerNameInput.value = storedName;
+
+// Resize canvas on orientation change (mobile)
+window.addEventListener('resize', () => {
+    if (gameWrapper.classList.contains('hidden')) return;
+    if (currentMode === 'mobile') {
+        const maxW = Math.floor(window.innerWidth * 0.92);
+        canvas.width = maxW; canvas.height = Math.floor(maxW * 0.9);
+    }
+});
