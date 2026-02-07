@@ -1,71 +1,89 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CYBER ARCADE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background-city" aria-hidden="true"></div>
-    <div class="scanline" aria-hidden="true"></div>
+
+    <!-- SFONDO ANIMATO -->
+    <div class="scanline"></div>
+    <div class="background-city"></div>
 
     <!-- MENU PRINCIPALE -->
     <div id="main-menu" class="menu-container">
         <h1 class="glitch-title">CYBER ARCADE</h1>
-        <p class="subtitle">READY TO PLAY?</p>
-
-        <input type="text" id="player-name-input" placeholder="YOUR NAME" maxlength="12" autocomplete="off">
-
-        <div class="mode-select">
+        <p class="subtitle">SELECT INTERFACE</p>
+        
+        <div class="menu-buttons">
             <button id="btn-desktop" class="mode-btn">DESKTOP</button>
             <button id="btn-mobile" class="mode-btn">MOBILE</button>
         </div>
 
-        <div class="settings">
+        <div class="options-row">
             <button id="btn-music-toggle" class="small-btn">MUSIC: ON</button>
-            <button id="btn-show-leaderboard-main" class="small-btn cyan-btn">TOP SCORES</button>
+            <button id="btn-show-leaderboard-main" class="small-btn">TOP SCORE</button>
         </div>
     </div>
 
-    <!-- SELEZIONE GIOCO -->
+    <!-- SCHERMATA SELEZIONE GIOCO -->
     <div id="game-selector" class="menu-container hidden">
         <h1 class="glitch-title">SELECT GAME</h1>
+        
+        <input type="text" id="player-name-input" placeholder="ENTER NAME" maxlength="10">
+
         <div class="game-grid">
             <button id="btn-pre-snake" class="game-btn">SNAKE 2.0</button>
             <button id="btn-play-pong" class="game-btn">NEON PONG</button>
+            <button id="btn-play-tetris" class="game-btn">CYBER TETRIS</button>
+            <button id="btn-play-invaders" class="game-btn">CYBER INVADERS</button>
         </div>
+
         <button id="back-to-main" class="mode-btn red-btn">BACK</button>
     </div>
 
-    <!-- DIFFICOLTÀ SNAKE -->
+    <!-- SCHERMATA DIFFICOLTA' SNAKE -->
     <div id="snake-difficulty" class="menu-container hidden">
-        <h1 class="glitch-title">SNAKE SPEED</h1>
-        <button id="btn-snake-normal" class="game-btn">NORMAL</button>
-        <button id="btn-snake-hard" class="game-btn">HARDCORE</button>
-        <button id="back-to-games" class="mode-btn red-btn">BACK</button>
+        <h1 class="glitch-title">SNAKE MODE</h1>
+        <div class="menu-buttons">
+            <button id="btn-snake-normal" class="mode-btn cyan-btn">NORMAL</button>
+            <button id="btn-snake-hard" class="mode-btn red-btn">HARDCORE</button>
+        </div>
+        <button id="back-to-games" class="mode-btn">BACK</button>
     </div>
 
-    <!-- CLASSIFICA -->
+    <!-- SCHERMATA LEADERBOARD -->
     <div id="leaderboard-screen" class="menu-container hidden">
         <h1 class="glitch-title">TOP SCORES</h1>
+        
         <div class="leaderboard-tabs">
-            <button id="tab-snake" class="tab-btn active">SNAKE</button>
-            <button id="tab-pong" class="tab-btn">PONG</button>
+            <button class="tab-btn active" id="tab-snake">SNAKE</button>
+            <button class="tab-btn" id="tab-pong">PONG</button>
+            <button class="tab-btn" id="tab-tetris">TETRIS</button>
+            <button class="tab-btn" id="tab-invaders">INVADERS</button>
         </div>
-        <div id="leaderboard-list" class="leaderboard-list"></div>
-        <button id="back-from-leaderboard" class="mode-btn red-btn">BACK</button>
+
+        <div id="leaderboard-list" class="leaderboard-list">
+            <!-- Punteggi inseriti via JS -->
+        </div>
+
+        <button id="back-from-leaderboard" class="mode-btn">BACK</button>
     </div>
 
     <!-- AREA DI GIOCO -->
-    <div id="game-wrapper" class="menu-container hidden">
-        <h2 id="game-title-display" class="subtitle">GAME</h2>
+    <div id="game-wrapper" class="hidden">
+        <h1 id="game-title-display">GAME</h1>
         <div id="score">SCORE: 0</div>
+        
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        
+        <div id="desktop-hint" class="hint-text">USA W, A, S, D o FRECCE per muoverti</div>
 
-        <canvas id="gameCanvas"></canvas>
-
-        <div id="mobile-controls" class="hidden" aria-hidden="true">
+        <!-- CONTROLLI MOBILE -->
+        <div id="mobile-controls" class="hidden">
             <div class="d-pad-row">
                 <button id="btn-up" class="d-pad">▲</button>
             </div>
@@ -76,14 +94,13 @@
             </div>
         </div>
 
-        <p id="desktop-hint" class="hint-text">USE WASD OR ARROWS TO CONTROL</p>
-
         <div class="game-buttons">
             <button id="retry-btn" class="mode-btn cyan-btn">RETRY</button>
             <button id="exit-game-btn" class="mode-btn red-btn">EXIT</button>
         </div>
     </div>
 
+    <!-- AUDIO -->
     <audio id="bg-music" loop>
         <source src="music.mp3" type="audio/mpeg">
     </audio>
