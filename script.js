@@ -169,10 +169,6 @@ btnPlayInvaders.addEventListener('click', () => { if(checkName()) initGame('inva
 btnBackToMain.addEventListener('click', () => {
     gameSelector.classList.add('hidden');
     mainMenu.classList.remove('hidden');
-    
-    // Mostra copyright nei menu
-    const copyright = document.getElementById('copyright-notice');
-    if (copyright) copyright.classList.remove('hidden');
 });
 
 // MODIFICA: Salvataggio punteggio all'uscita
@@ -181,10 +177,6 @@ btnExitGame.addEventListener('click', () => {
     stopGame();
     gameWrapper.classList.add('hidden');
     gameSelector.classList.remove('hidden');
-    
-    // Mostra copyright nei menu
-    const copyright = document.getElementById('copyright-notice');
-    if (copyright) copyright.classList.remove('hidden');
 });
 
 btnRetry.addEventListener('click', () => {
@@ -295,18 +287,23 @@ function initGame(gameName) {
     gameSelector.classList.add('hidden');
     snakeDifficultyScreen.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
-    
-    // Nascondi copyright durante il gioco
-    const copyright = document.getElementById('copyright-notice');
-    if (copyright) copyright.classList.add('hidden');
 
     // CONFIGURAZIONE DIMENSIONI CANVAS
     if (currentMode === 'mobile') {
-        canvas.width = 300; 
-        canvas.height = 540; 
+        if (currentGame === 'tetris') {
+            canvas.width = 300;
+            // Calcola altezza coerente con numero di righe e colonne:
+            const blockSize = Math.floor(canvas.width / tetrisCol);
+            canvas.height = blockSize * tetrisRow; // ad es. 300/12=25 -> 25*24=600
+        } else {
+            canvas.width = 300; 
+            canvas.height = 540; 
+        }
     } else {
         if (currentGame === 'tetris') {
-            canvas.width = 300; canvas.height = 600;
+            canvas.width = 300;
+            const blockSize = Math.floor(canvas.width / tetrisCol);
+            canvas.height = blockSize * tetrisRow;
         } else {
             canvas.width = 400; canvas.height = 400;
         }
@@ -537,7 +534,7 @@ function drawInvaders() {
 }
 
 // ====
-// LOGICA TETRIS (Invariata)
+// LOGICA TETRIS (Invariata ma con correzioni)
 // ====
 function createMatrix(w, h) {
     const matrix = [];
@@ -554,7 +551,7 @@ function createPiece(type) {
     if (type === 'T') return [[0, 7, 0], [7, 7, 7], [0, 0, 0]];
 }
 function drawTetrisMatrix(matrix, offset) {
-    const blockSize = canvas.width / tetrisCol; 
+    const blockSize = Math.floor(canvas.width / tetrisCol);
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
@@ -642,7 +639,13 @@ function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) return true;
+            if (m[y][x] !== 0) {
+                const ay = y + o.y;
+                const ax = x + o.x;
+                // Se siamo fuori dall'arena in qualunque direzione -> collisione
+                if (!arena[ay] || arena[ay][ax] === undefined) return true;
+                if (arena[ay][ax] !== 0) return true;
+            }
         }
     }
     return false;
