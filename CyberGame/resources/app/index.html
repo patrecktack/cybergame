@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBER ARCADE</title>
+    
+    <!-- Collegamento al Manifest per PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#bc13fe">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        // Registrazione del Service Worker per il funzionamento offline e installazione
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrato!', reg))
+                    .catch(err => console.err('Errore registrazione SW:', err));
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <div class="scanline"></div>
+
+    <!-- 1. MENU PRINCIPALE -->
+    <div id="main-menu">
+        <h1>CYBER ARCADE</h1>
+        <p class="subtitle">SELECT INTERFACE</p>
+        
+        <div class="mode-selection">
+            <button id="btn-desktop" class="mode-btn">DESKTOP</button>
+            <button id="btn-mobile" class="mode-btn">MOBILE</button>
+            <button id="btn-music-toggle" class="mode-btn">MUSIC: ON</button>
+            <button id="btn-show-leaderboard-main" class="mode-btn" style="border-color: #bc13fe; color: #bc13fe;">TOP SCORE</button>
+        </div>
+
+        <!-- Riga Copyright aggiunta qui -->
+        <div style="margin-top: 30px; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: #00ffea; text-transform: uppercase; letter-spacing: 2px;">
+            © Copyright 2026 Patrecktack - All Rights Reserved
+        </div>
+    </div>
+
+    <!-- 2. SELEZIONE GIOCO -->
+    <div id="game-selector" class="hidden">
+        <h1>SELECT GAME</h1>
+        
+        <!-- INPUT NOME GIOCATORE: Max 25 lettere (riempie la barra) -->
+        <div class="input-container">
+            <input type="text" id="player-name-input" placeholder="ENTER NAME" maxlength="22">
+        </div>
+
+        <div class="mode-selection">
+            <button id="btn-pre-snake" class="mode-btn">SNAKE 2.0</button>
+            <button id="btn-play-pong" class="mode-btn">NEON PONG</button>
+            <button id="btn-play-tetris" class="mode-btn">CYBER TETRIS</button>
+            <button id="btn-play-invaders" class="mode-btn">CYBER INVADERS</button>
+            
+            <button id="back-to-main" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">BACK</button>
+        </div>
+    </div>
+
+    <!-- 2b. SELEZIONE DIFFICOLTA SNAKE -->
+    <div id="snake-difficulty" class="hidden">
+        <h1>SNAKE MODE</h1>
+        <div class="mode-selection">
+            <button id="btn-snake-normal" class="mode-btn" style="border-color: #00ffea; color: #00ffea;">NORMAL</button>
+            <button id="btn-snake-hard" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">HARDCORE</button>
+            <button id="back-to-games" class="mode-btn">BACK</button>
+        </div>
+    </div>
+
+    <!-- 2c. SCHERMATA CLASSIFICA -->
+    <div id="leaderboard-screen" class="hidden">
+        <h1>TOP SCORES</h1>
+        <div class="leaderboard-tabs">
+            <button id="tab-snake" class="tab-btn active">SNAKE</button>
+            <button id="tab-pong" class="tab-btn">PONG</button>
+            <button id="tab-tetris" class="tab-btn">TETRIS</button>
+            <button id="tab-invaders" class="tab-btn">INVADERS</button>
+        </div>
+        <div id="leaderboard-list">
+            <!-- I punteggi verranno inseriti qui via JS -->
+        </div>
+        <div class="mode-selection">
+            <button id="back-from-leaderboard" class="mode-btn">BACK</button>
+        </div>
+    </div>
+    
+    <!-- 3. AREA DI GIOCO -->
+    <div id="game-wrapper" class="hidden">
+        <h1 id="game-title-display">GAME</h1>
+        
+        <div id="game-container">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+        </div>
+        
+        <div id="score">SCORE: 0</div>
+        
+        <!-- CONTROLLI MOBILE -->
+        <div id="mobile-controls" class="hidden">
+            <div class="control-row">
+                <button id="btn-up" class="d-pad">▲</button>
+            </div>
+            <div class="control-row">
+                <button id="btn-left" class="d-pad">◀</button>
+                <button id="btn-down" class="d-pad">▼</button>
+                <button id="btn-right" class="d-pad">▶</button>
+            </div>
+        </div>
+
+        <!-- PULSANTI DI GIOCO -->
+        <div class="game-buttons">
+            <button id="retry-btn" class="mode-btn" style="border-color: #00ffea; color: #00ffea;">RETRY</button>
+            <button id="exit-game-btn" class="mode-btn" style="border-color: #ff0055; color: #ff0055;">EXIT</button>
+        </div>
+
+        <!-- INFO COMANDI -->
+        <div id="desktop-hint" class="controls-hint hidden">
+            Usa W, A, S, D per muoverti<br>
+            SPAZIO o SU per sparare (Invaders)
+        </div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

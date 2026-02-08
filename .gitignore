@@ -1,0 +1,4 @@
+node_modules/
+MioGioco-win32-x64/
+*.zip
+*.exe
