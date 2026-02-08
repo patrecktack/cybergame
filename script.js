@@ -169,6 +169,10 @@ btnPlayInvaders.addEventListener('click', () => { if(checkName()) initGame('inva
 btnBackToMain.addEventListener('click', () => {
     gameSelector.classList.add('hidden');
     mainMenu.classList.remove('hidden');
+    
+    // Mostra copyright nei menu
+    const copyright = document.getElementById('copyright-notice');
+    if (copyright) copyright.classList.remove('hidden');
 });
 
 // MODIFICA: Salvataggio punteggio all'uscita
@@ -177,6 +181,10 @@ btnExitGame.addEventListener('click', () => {
     stopGame();
     gameWrapper.classList.add('hidden');
     gameSelector.classList.remove('hidden');
+    
+    // Mostra copyright nei menu
+    const copyright = document.getElementById('copyright-notice');
+    if (copyright) copyright.classList.remove('hidden');
 });
 
 btnRetry.addEventListener('click', () => {
@@ -287,6 +295,10 @@ function initGame(gameName) {
     gameSelector.classList.add('hidden');
     snakeDifficultyScreen.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
+    
+    // Nascondi copyright durante il gioco
+    const copyright = document.getElementById('copyright-notice');
+    if (copyright) copyright.classList.add('hidden');
 
     // CONFIGURAZIONE DIMENSIONI CANVAS
     if (currentMode === 'mobile') {
