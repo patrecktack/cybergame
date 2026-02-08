@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER ARCADE</title>
+    <title>CYBER ARCADE 2.0</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -40,9 +40,14 @@
 
     <!-- AREA DI GIOCO -->
     <div id="game-wrapper" style="display: none;">
-        <h1 id="game-title">GAME</h1>
+        <div class="game-header">
+            <h2 id="game-title">GAME</h2>
+            <div id="score-display">SCORE: 0</div>
+            <div id="high-score-display">BEST: 0</div>
+        </div>
+        
         <div class="canvas-container">
-            <canvas id="gameCanvas"></canvas>
+            <canvas id="gameCanvas" width="400" height="600"></canvas>
         </div>
         
         <div id="mobile-controls" class="controls" style="display: none;">
