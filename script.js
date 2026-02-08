@@ -107,9 +107,9 @@ let invEnemySpeed = 1;
 let invEnemyDrop = 10; 
 let invScore = 0;
 
-// ==========================================
+// ====
 // GESTIONE MENU E NAVIGAZIONE
-// ==========================================
+// ====
 
 btnDesktop.addEventListener('click', () => setInterface('desktop'));
 btnMobile.addEventListener('click', () => setInterface('mobile'));
@@ -201,9 +201,9 @@ btnRetry.addEventListener('click', () => {
     startGame();
 });
 
-// ==========================================
+// ====
 // LEADERBOARD LOGIC
-// ==========================================
+// ====
 btnShowLeaderboardMain.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     leaderboardScreen.classList.remove('hidden');
@@ -278,9 +278,9 @@ function showLeaderboard(game) {
     }
 }
 
-// ==========================================
+// ====
 // INIT GIOCO
-// ==========================================
+// ====
 
 function initGame(gameName) {
     currentGame = gameName;
@@ -347,9 +347,9 @@ function initGame(gameName) {
     startGame();
 }
 
-// ==========================================
+// ====
 // LOOP DI GIOCO
-// ==========================================
+// ====
 
 function startGame() {
     stopGame();
@@ -387,9 +387,9 @@ function gameLoop() {
     }
 }
 
-// ==========================================
+// ====
 // LOGICA INVADERS
-// ==========================================
+// ====
 function initInvaders(resetScore = true) {
     if (resetScore) {
         invScore = 0;
@@ -524,9 +524,9 @@ function drawInvaders() {
     ctx.shadowBlur = 0;
 }
 
-// ==========================================
+// ====
 // LOGICA TETRIS (Invariata)
-// ==========================================
+// ====
 function createMatrix(w, h) {
     const matrix = [];
     while (h--) matrix.push(new Array(w).fill(0));
@@ -659,9 +659,9 @@ function updateTetris(time = 0) {
     requestAnimationFrame(updateTetris);
 }
 
-// ==========================================
+// ====
 // LOGICA SNAKE & PONG
-// ==========================================
+// ====
 
 function updateSnake() {
     const head = {x: snake[0].x + velocityX, y: snake[0].y + velocityY};
@@ -801,9 +801,9 @@ function gameOver() {
     ctx.fillText('Premi RETRY o EXIT', canvas.width / 2, canvas.height / 2 + 30);
 }
 
-// ==========================================
+// ====
 // INPUT CONTROLLER
-// ==========================================
+// ====
 function inputUp() {
     if (currentGame === 'snake' && velocityY !== 1) { velocityX = 0; velocityY = -1; }
     if (currentGame === 'pong' && paddle1Y > 0) { paddle1Y -= 20; }
