@@ -1,21 +1,40 @@
 {
-  "name": "Cyber Arcade",
+  "id": "com.cyberarcade.app",
+  "name": "CYBER ARCADE",
   "short_name": "CyberArcade",
-  "start_url": "index.html",
+  "description": "Un'arena arcade in stile cyberpunk con Snake, Pong, Tetris e Invaders.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#bc13fe",
   "orientation": "portrait",
+  "categories": ["games", "entertainment"],
   "icons": [
     {
-      "src": "https://via.placeholder.com/192x192.png?text=Cyber",
+      "src": "https://via.placeholder.com/192x192.png?text=CYBER",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://via.placeholder.com/512x512.png?text=CyberArcade",
+      "src": "https://via.placeholder.com/512x512.png?text=CYBER+ARCADE",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://via.placeholder.com/1280x720.png?text=Cyber+Arcade+Gameplay",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "https://via.placeholder.com/720x1280.png?text=Cyber+Arcade+Mobile",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
