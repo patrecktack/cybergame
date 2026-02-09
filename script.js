@@ -86,7 +86,7 @@ let ballSpeedY = 5;
 let pongScore = 0;
 
 // --- VARIABILI TETRIS ---
-const tetrisRow = 5; // Test correzione (def 24)
+const tetrisRow = 21; // Test correzione (def 24)
 const tetrisCol = 12;
 let tetrisArena = [];
 let tetrisPlayer = { pos: {x: 0, y: 0}, matrix: null };
