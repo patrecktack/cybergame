@@ -87,7 +87,7 @@ let pongScore = 0;
 
 // --- VARIABILI TETRIS ---
 const tetrisRow = 24;
-const tetrisCol = 12; 
+const tetrisCol = 12; // Test per correzzione
 let tetrisArena = [];
 let tetrisPlayer = { pos: {x: 0, y: 0}, matrix: null };
 let dropCounter = 0;
