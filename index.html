@@ -22,7 +22,11 @@
                     .then(reg => console.log('Service Worker registrato!', reg))
                     .catch(err => console.err('Errore registrazione SW:', err));
             });
-        }
+        };
+        
+        const script = document.createElement('script');
+        script.src = 'script.js?v=' + Date.now();
+        document.body.appendChild(script)
     </script>
 </head>
 <body>
